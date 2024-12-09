@@ -3509,7 +3509,7 @@ class PlayState extends MusicBeatState
 		}
 		luaArray = [];
 		FunkinLua.customFunctions.clear();
-		end
+		#end
 		
 		#if (MODS_ALLOWED && SScript)
 		for (script in hscriptInterps)
