@@ -144,10 +144,8 @@ enum KeyboardScheme
  */
 class Controls extends FlxActionSet
 {
-    public static function instance():Controls
-    {
-        return Controls;
-    }
+    //0.7 Support
+    public static var instance:Controls;
     
     public static var isInSubstate:Bool = false;
 	var _ui_up = new FlxActionDigital(Action.UI_UP);

@@ -29,7 +29,7 @@ using StringTools;
 
 class GameplaySettingsSubState extends BaseOptionsMenu
 {
-    final lastModpack:String = ClientPrefs.data.Modpack;
+    final lastModpack:Bool = ClientPrefs.data.Modpack;
 	public function new()
 	{
 		title = 'Gameplay Settings';
