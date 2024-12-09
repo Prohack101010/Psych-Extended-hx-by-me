@@ -222,6 +222,7 @@ class CharacterEditorState extends MusicBeatState
 		var playerXDifference = 0;
 		if(char.isPlayer) playerXDifference = 670;
 
+        var lastLevel:String = Paths.currentLevel;
 		if(onPixelBG) {
 			var playerYDifference:Float = 0;
 			if(char.isPlayer) {
@@ -272,6 +273,7 @@ class CharacterEditorState extends MusicBeatState
 			bgLayer.add(stageFront);
 			changeBGbutton.text = "Pixel BG";
 		}
+		Paths.setCurrentLevel(lastLevel);
 	}
 
 	/*var animationInputText:FlxUIInputText;
