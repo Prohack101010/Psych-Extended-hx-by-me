@@ -15,17 +15,33 @@ class HScript extends SScript
 		if(parent.hscript == null)
 		{
 			trace('initializing haxe interp for: ${parent.scriptName}');
-			parent.hscript = new HScript(parent, parent.scriptName);
+			parent.hscript = new HScript(parent);
 		}
 		#end
 	}
 
-	public var interpName:String = null;
-	override public function new(?parent:FunkinLua = null, interpName:String)
+	public static function initHaxeModuleCode(parent:FunkinLua, code:String)
 	{
-		super("", false);
+		#if (SScript >= "3.0.0")
+		if(parent.hscript == null)
+		{
+			trace('initializing haxe interp for: ${parent.scriptName}');
+			parent.hscript = new HScript(parent, code);
+		}
+		#end
+	}
+	public var origin:String;
+	override public function new(?parent:FunkinLua = null, ?file:String)
+	{
+		if (file == null)
+			file = '';
+	
+		super(file, false);
 		parentLua = parent;
-		this.interpName = interpName;
+		if (parent != null)
+			origin = parent.scriptName;
+		if (scriptFile != null && scriptFile.length > 0)
+			origin = scriptFile;
 		preset();
 	}
 
@@ -116,9 +132,9 @@ class HScript extends SScript
 				if(parentLua != null)
 				{
 					FunkinLua.lastCalledScript = parentLua;
-					msg = parentLua.scriptName + ":" + parentLua.lastCalledFunction + " - " + msg;
+					msg = origin + ":" + parentLua.lastCalledFunction + " - " + msg;
 				}
-				else msg = '$interpName - $msg';
+				else msg = '$origin - $msg';
 				FunkinLua.luaTrace(msg, parentLua == null, false, FlxColor.RED);
 			}
 		});
@@ -136,23 +152,26 @@ class HScript extends SScript
 		#end
 	}
 
-	public function executeCode(codeToRun:String, ?funcToRun:String = null, ?funcArgs:Array<Dynamic>):SCall
+	public function executeCode(?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):SCall
 	{
-		doString(codeToRun);
-
 		if (funcToRun != null)
 		{
+		    if(!exists(funcToRun))
+			{
+				FunkinLua.luaTrace(origin + ' - No HScript function named: $funcToRun', false, false, FlxColor.RED);
+				return null;
+			}
 			var callValue = call(funcToRun, funcArgs);
 			if (callValue.succeeded)
-				return callValue.returnValue;
+				return callValue;
 			else
 			{
 				var e = callValue.exceptions[0];
 				if (e != null)
 				{
 					var msg:String = e.toString();
-					if(parentLua != null) msg = parentLua.scriptName + ":" + parentLua.lastCalledFunction + " - " + msg;
-					else msg = '$interpName - $msg';
+					if(parentLua != null) msg = origin + ":" + parentLua.lastCalledFunction + " - " + msg;
+					else msg = '$origin - $msg';
 					FunkinLua.luaTrace(msg, parentLua == null, false, FlxColor.RED);
 				}
 				return null;
@@ -175,7 +194,7 @@ class HScript extends SScript
 		funk.addLocalCallback("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null) {
 			var retVal:SCall = null;
 			#if (SScript >= "3.0.0")
-			initHaxeModule(funk);
+			initHaxeModuleCode(funk, codeToRun);
 			if(varsToBring != null)
 			{
 				for (key in Reflect.fields(varsToBring))
@@ -184,20 +203,21 @@ class HScript extends SScript
 					funk.hscript.set(key, Reflect.field(varsToBring, key));
 				}
 			}
-			retVal = funk.hscript.executeCode(codeToRun, funcToRun, funcArgs);
-			if (funcToRun != null && funcArgs != null && retVal != null && !retVal.succeeded)
+			retVal = funk.hscript.executeCode(funcToRun, funcArgs);
+			if (retVal != null)
 			{
+				if(retVal.succeeded)
+					return (retVal.returnValue == null || LuaUtils.isOfTypes(retVal.returnValue, [Bool, Int, Float, String, Array])) ? retVal.returnValue : null;
 				var e = retVal.exceptions[0];
 				if (e != null)
-					FunkinLua.luaTrace(funk.scriptName + ":" + funk.lastCalledFunction + " - " + e, false, false, FlxColor.RED);
+					FunkinLua.luaTrace(funk.hscript.origin + ":" + funk.lastCalledFunction + " - " + e, false, false, FlxColor.RED);
 				return null;
 			}
 			#else
 			FunkinLua.luaTrace("runHaxeCode: HScript isn't supported on this platform!", false, false, FlxColor.RED);
 			#end
 
-			if(retVal != null && !LuaUtils.isOfTypes(retVal.returnValue, [Bool, Int, Float, String, Array])) retVal = null;
-			return retVal;
+			return null;
 		});
 		
 		funk.addLocalCallback("runHaxeFunction", function(funcToRun:String, ?funcArgs:Array<Dynamic> = null) {
@@ -207,7 +227,7 @@ class HScript extends SScript
 			{
 				var e = callValue.exceptions[0];
 				if (e != null)
-					FunkinLua.luaTrace('ERROR (${funk.scriptName}: ${callValue.calledFunction}) - ' + e.message.substr(0, e.message.indexOf('\n')), false, false, FlxColor.RED);
+					FunkinLua.luaTrace('ERROR (${funk.hscript.origin}: ${callValue.calledFunction}) - ' + e.message.substr(0, e.message.indexOf('\n')), false, false, FlxColor.RED);
 				return null;
 			}
 			else
@@ -218,19 +238,27 @@ class HScript extends SScript
 		});
 		// This function is unnecessary because import already exists in SScript as a native feature
 		funk.addLocalCallback("addHaxeLibrary", function(libName:String, ?libPackage:String = '') {
-			#if (SScript >= "3.0.0")
-			initHaxeModule(funk);
-			try {
-				var str:String = '';
-				if(libPackage.length > 0)
-					str = libPackage + '.';
+			var str:String = '';
+			if(libPackage.length > 0)
+				str = libPackage + '.';
+			else if(libName == null)
+				libName = '';
 
-				var c = Type.resolveClass(str + libName);
-				if (c != null)
-					funk.hscript.set(libName, c);
-			}
-			catch (e:Dynamic) {
-				FunkinLua.luaTrace(funk.scriptName + ":" + funk.lastCalledFunction + " - " + e, false, false, FlxColor.RED);
+			var c = Type.resolveClass(str + libName);
+			#if (SScript >= "3.0.3")
+			if (c != null)
+				SScript.globalVariables[libName] = c;
+			#end
+			#if (SScript >= "3.0.0")
+			if (funk.hscript != null)
+			{
+				try {
+					if (c != null)
+						funk.hscript.set(libName, c);
+				}
+				catch (e:Dynamic) {
+					FunkinLua.luaTrace(funk.hscript.origin + ":" + funk.lastCalledFunction + " - " + e, false, false, FlxColor.RED);
+				}
 			}
 			#else
 			FunkinLua.luaTrace("addHaxeLibrary: HScript isn't supported on this platform!", false, false, FlxColor.RED);
@@ -238,5 +266,14 @@ class HScript extends SScript
 		});
 		#end
 	}
+	
+	#if (SScript >= "3.0.3")
+	override public function destroy()
+	{
+		origin = null;
+		parentLua = null;
+		super.destroy();
+	}
+	#end
 }
 #end

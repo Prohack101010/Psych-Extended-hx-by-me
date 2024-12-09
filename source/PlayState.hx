@@ -75,6 +75,10 @@ import states.*;
 import psychlua.*;
 import psychlua.FunkinLua;
 
+#if (SScript >= "3.0.0")
+import tea.SScript;
+#end
+
 #if !flash 
 import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
@@ -118,7 +122,7 @@ class PlayState extends MusicBeatState
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 	
 	#if (MODS_ALLOWED && SScript)
-	public var hscriptInterps:Array<HScript> = [];
+	public var hscriptArray:Array<HScript> = [];
 	#end
 	
 	#if LUA_ALLOWED
@@ -970,26 +974,33 @@ class PlayState extends MusicBeatState
 		var luaFile:String = 'characters/' + name + '.lua';
 		#if MODS_ALLOWED
 		var replacePath:String = Paths.modFolders(luaFile);
-		if(FileSystem.exists(replacePath)) {
+		if(FileSystem.exists(replacePath))
+		{
 			luaFile = replacePath;
 			doPush = true;
-		} else {
+		}
+		else
+		{
 			luaFile = Paths.getPreloadPath(luaFile);
-			if(FileSystem.exists(luaFile)) {
+			if(FileSystem.exists(luaFile))
 				doPush = true;
-			}
 		}
 		#else
 		luaFile = Paths.getPreloadPath(luaFile);
-		if(Assets.exists(luaFile)) {
-			doPush = true;
-		}
+		if(Assets.exists(luaFile)) doPush = true;
 		#end
 
 		if(doPush)
 		{
-			for (script in luaArray) if(script.scriptName == luaFile) return;
-			new FunkinLua(luaFile);
+			for (script in luaArray)
+			{
+				if(script.scriptName == luaFile)
+				{
+					doPush = false;
+					break;
+				}
+			}
+			if(doPush) new FunkinLua(luaFile);
 		}
 		#end
 		
@@ -997,21 +1008,25 @@ class PlayState extends MusicBeatState
 		#if (MODS_ALLOWED && SScript)
 		var doPush:Bool = false;
 		var scriptFile:String = 'characters/' + name + '.hx';
-		var replacePath:String = Paths.modFolders(luaFile);
-		if(FileSystem.exists(replacePath)) {
+		var replacePath:String = Paths.modFolders(scriptFile);
+		if(FileSystem.exists(replacePath))
+		{
 			scriptFile = replacePath;
 			doPush = true;
-		} else {
+		}
+		else 
+		{
 			scriptFile = Paths.getPreloadPath(scriptFile);
-			if(FileSystem.exists(scriptFile)) {
+			if(FileSystem.exists(scriptFile))
 				doPush = true;
-			}
 		}
 		
 		if(doPush)
 		{
-			for (script in hscriptInterps) if(script.interpName == scriptFile) return;
-			initHScript(scriptFile);
+			if(SScript.global.exists(scriptFile))
+				doPush = false;
+				
+			if(doPush) initHScript(scriptFile);
 		}
 		#end
 	}
@@ -3513,10 +3528,17 @@ class PlayState extends MusicBeatState
 		#end
 		
 		#if (MODS_ALLOWED && SScript)
-		for (script in hscriptInterps)
+		for (script in hscriptArray)
 			if(script != null)
+			{
+				script.call('onDestroy');
 				script.active = false;
-		hscriptInterps = [];
+				#if (SScript >= "3.0.3")
+				script.destroy();
+				#end
+			}
+		while (hscriptArray.length > 0)
+			hscriptArray.pop();
 		#end
 
 		if(!ClientPrefs.data.controllerMode)
@@ -3663,8 +3685,7 @@ class PlayState extends MusicBeatState
 		
 		if(FileSystem.exists(scriptToLoad))
 		{
-			for (script in hscriptInterps)
-				if(script.interpName == scriptFile) return false;
+			if (SScript.global.exists(scriptToLoad)) return false;
 	
 			initHScript(scriptToLoad);
 			return true;
@@ -3675,13 +3696,12 @@ class PlayState extends MusicBeatState
 	{
 		try
 		{
-			var newScript:HScript = new HScript(file);
-			newScript.doString(File.getContent(file));
-			hscriptInterps.push(newScript);
-			if(newScript.exists('onCreate')) newScript.call('onCreate', []);
+			var newScript:HScript = new HScript(null, file);
+			hscriptArray.push(newScript);
+			if(newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('initialized sscript interp successfully: $file');
 		}
-		catch(e:Dynamic)
+		catch(e)
 		{
 			addTextToDebug('ERROR ($file) - ' + e.toString(), FlxColor.RED);
 		}
@@ -3732,53 +3752,48 @@ class PlayState extends MusicBeatState
 		return returnVal;
 	}
 	
-	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
 		var returnVal:Dynamic = psychlua.FunkinLua.Function_Continue;
 		#if (MODS_ALLOWED && SScript)
-		if(args == null) args = [];
-		if(exclusions == null) exclusions = [];
-		if(excludeValues == null) excludeValues = [psychlua.FunkinLua.Function_Continue];
+		if(exclusions == null) exclusions = new Array();
+		if(excludeValues == null) excludeValues = new Array();
+		excludeValues.push(psychlua.FunkinLua.Function_Continue);
 		
-		var len:Int = luaArray.length;
-		var i:Int = 0;
-		while(i < len)
+		var len:Int = hscriptArray.length;
+		if (len < 1)
+			return returnVal;
+		for(i in 0...len)
 		{
-			var script:HScript = hscriptInterps[i];
-			if(!script.exists(funcToCall) || exclusions.contains(script.interpName))
-			{
-				i++;
+			var script:HScript = hscriptArray[i];
+			if(script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
 				continue;
-			}
+				
 			var myValue:Dynamic = null;
 			try
 			{
 				var callValue = script.call(funcToCall, args);
-				if (!callValue.succeeded)
+				if(!callValue.succeeded)
 				{
 					var e = callValue.exceptions[0];
-					if (e != null)
-						FunkinLua.luaTrace('ERROR (${script.interpName}: ${callValue.calledFunction}) - ' + e.message.substr(0, e.message.indexOf('\n')), true, false, FlxColor.RED);
-					i++;
-					continue;
+					if(e != null)
+						FunkinLua.luaTrace('ERROR (${script.origin}: ${callValue.calledFunction}) - ' + e.message.substr(0, e.message.indexOf('\n')), true, false, FlxColor.RED);
 				}
-				myValue = callValue.returnValue;
-				if((myValue == FunkinLua.Function_StopHScript || myValue == FunkinLua.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+				else
 				{
-					returnVal = myValue;
-					break;
+					myValue = callValue.returnValue;
+					if((myValue == FunkinLua.Function_StopHScript || myValue == FunkinLua.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+					{
+						returnVal = myValue;
+						break;
+					}
+					
+					if(myValue != null && !excludeValues.contains(myValue))
+						returnVal = myValue;
 				}
-				
-				if(myValue != null && !excludeValues.contains(myValue))
-					returnVal = myValue;
 			}
-			catch(e:Dynamic)
-			{
-				//addTextToDebug('ERROR (${script.interpName}) - ' + e.toString(), FlxColor.RED); //myValue);
-			}
-			if(!script.active) i++;
-			else len--;
 		}
 		#end
+		
 		return returnVal;
 	}
 	public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
@@ -3801,8 +3816,8 @@ class PlayState extends MusicBeatState
 	public function setOnHScript(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
 		#if (MODS_ALLOWED && SScript)
 		if(exclusions == null) exclusions = [];
-		for (script in hscriptInterps) {
-			if(exclusions.contains(script.interpName))
+		for (script in hscriptArray) {
+			if(exclusions.contains(script.origin))
 				continue;
 			script.set(variable, arg);
 		}
