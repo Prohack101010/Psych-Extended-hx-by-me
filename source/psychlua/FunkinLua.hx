@@ -77,10 +77,6 @@ class FunkinLua {
 	public var hscript:HScript = null;
 	#end
 	
-	#if hscript
-	public var hscriptBase:HScriptBase = null;
-	#end
-	
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 	
@@ -1602,7 +1598,6 @@ class FunkinLua {
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
 		#if android AndroidFunctions.implement(this); #end
 		#if (SScript >= "3.0.0") HScript.implement(this); #end
-		#if hscript HScriptBase.implement(this); #end
 		DeprecatedFunctions.implement(this);
 		ReflectionFunctions.implement(this);
 		CustomFunctions.implement(this);
@@ -1708,11 +1703,6 @@ class FunkinLua {
 			hscript.active = false;
 			hscript = null;
 		}
-		#end
-		
-		#if hscript
-		if(hscriptBase != null) hscriptBase.interp = null;
-		hscriptBase = null;
 		#end
 		
 		#end
