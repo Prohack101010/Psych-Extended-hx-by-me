@@ -77,6 +77,10 @@ class FunkinLua {
 	public var hscript:HScript = null;
 	#end
 	
+	#if hscript
+	public var hscriptBase:HScriptBase = null;
+	#end
+	
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 	
@@ -272,7 +276,7 @@ class FunkinLua {
 				args = [];
 			}
 
-			var foundScript:String = findLuaScript(luaFile);
+			var foundScript:String = findScript(luaFile);
 			if(foundScript != null)
 				for (luaInstance in game.luaArray)
 					if(luaInstance.scriptName == foundScript)
@@ -283,7 +287,7 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "getGlobalFromScript", function(luaFile:String, global:String) { // returns the global from a script
-			var foundScript:String = findLuaScript(luaFile);
+			var foundScript:String = findScript(luaFile);
 			if(foundScript != null)
 				for (luaInstance in game.luaArray)
 					if(luaInstance.scriptName == foundScript)
@@ -305,14 +309,14 @@ class FunkinLua {
 					}
 		});
 		Lua_helper.add_callback(lua, "setGlobalFromScript", function(luaFile:String, global:String, val:Dynamic) { // returns the global from a script
-			var foundScript:String = findLuaScript(luaFile);
+			var foundScript:String = findScript(luaFile);
 			if(foundScript != null)
 				for (luaInstance in game.luaArray)
 				    if(luaInstance.scriptName == foundScript)
 						luaInstance.set(global, val);
 		});
 		/*Lua_helper.add_callback(lua, "getGlobals", function(luaFile:String) { // returns a copy of the specified file's globals
-			var foundScript:String = findLuaScript(luaFile);
+			var foundScript:String = findScript(luaFile);
 			if(foundScript != null)
 			{
 				for (luaInstance in game.luaArray)
@@ -370,7 +374,7 @@ class FunkinLua {
 			}
 		});*/
 		Lua_helper.add_callback(lua, "isRunning", function(luaFile:String) {
-			var foundScript:String = findLuaScript(luaFile);
+			var foundScript:String = findScript(luaFile);
 			if(foundScript != null)
 				for (luaInstance in game.luaArray)
 				    if(luaInstance.scriptName == foundScript)
@@ -380,7 +384,7 @@ class FunkinLua {
 
 
 		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf.
-			var foundScript:String = findLuaScript(luaFile);
+			var foundScript:String = findScript(luaFile);
 			if(foundScript != null)
 			{
 				if(!ignoreAlreadyRunning)
@@ -396,8 +400,28 @@ class FunkinLua {
 			}
 			luaTrace("addLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 		});
-		Lua_helper.add_callback(lua, "removeLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf.
-			var foundScript:String = findLuaScript(luaFile);
+		Lua_helper.add_callback(lua, "addHScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
+			#if HSCRIPT_ALLOWED
+			var foundScript:String = findScript(luaFile, '.hx');
+			if(foundScript != null)
+			{
+				if(!ignoreAlreadyRunning)
+					for (script in game.hscriptArray)
+						if(script.origin == foundScript)
+						{
+							luaTrace('addHScript: The script "' + foundScript + '" is already running!');
+							return;
+						}
+				PlayState.instance.initHScript(foundScript);
+				return;
+			}
+			luaTrace("addHScript: Script doesn't exist!", false, false, FlxColor.RED);
+			#else
+			luaTrace("addHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
+			#end
+		});
+		Lua_helper.add_callback(lua, "removeLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
+			var foundScript:String = findScript(luaFile);
 			if(foundScript != null)
 			{
 				if(!ignoreAlreadyRunning)
@@ -1573,14 +1597,7 @@ class FunkinLua {
 		});
 		//
 
-		Lua_helper.add_callback(lua, "debugPrint", function(text1:Dynamic = '', text2:Dynamic = '', text3:Dynamic = '', text4:Dynamic = '', text5:Dynamic = '') {
-			if (text1 == null) text1 = '';
-			if (text2 == null) text2 = '';
-			if (text3 == null) text3 = '';
-			if (text4 == null) text4 = '';
-			if (text5 == null) text5 = '';
-			luaTrace('' + text1 + text2 + text3 + text4 + text5, true, false);
-		});
+		Lua_helper.add_callback(lua, "debugPrint", function(text:Dynamic = '', color:String = 'WHITE') PlayState.instance.addTextToDebug(text, CoolUtil.colorFromString(color)));
 		
 		addLocalCallback("close", function() {
 			closed = true;
@@ -1596,8 +1613,9 @@ class FunkinLua {
 
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
-		#if android AndroidFunctions.implement(this); #end
 		#if (SScript >= "3.0.0") HScript.implement(this); #end
+		#if android AndroidFunctions.implement(this); #end
+		#if hscript HScriptBase.implement(this); #end
 		DeprecatedFunctions.implement(this);
 		ReflectionFunctions.implement(this);
 		CustomFunctions.implement(this);
@@ -1708,6 +1726,11 @@ class FunkinLua {
 		}
 		#end
 		
+		#if hscript
+		if(hscriptBase != null) hscriptBase.interp = null;
+		hscriptBase = null;
+		#end
+		
 		#end
 	}
 	//clone functions
@@ -1757,15 +1780,14 @@ class FunkinLua {
 		#end
 	}
 	
-	function findLuaScript(luaFile:String)
+	function findScript(scriptFile:String, ext:String = '.lua')
 	{
-		#if LUA_ALLOWED
-		if(!luaFile.endsWith(".lua")) luaFile += '.lua';
-		var preloadPath:String = Paths.getPreloadPath(luaFile);
+		if(!scriptFile.endsWith(ext)) scriptFile += ext;
+		var preloadPath:String = Paths.getPreloadPath(scriptFile);
 		#if MODS_ALLOWED
-		var path:String = Paths.modFolders(luaFile);
-		if(FileSystem.exists(luaFile))
-			return luaFile;
+		var path:String = Paths.modFolders(scriptFile);
+		if(FileSystem.exists(scriptFile))
+			return scriptFile;
 		else if(FileSystem.exists(path))
 			return path;
 	
@@ -1773,8 +1795,9 @@ class FunkinLua {
 		#else
 		if(Assets.exists(preloadPath))
 		#end
+		{
 			return preloadPath;
-		#end
+		}
 		return null;
 	}
 

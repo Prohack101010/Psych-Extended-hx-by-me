@@ -1247,20 +1247,27 @@ class PlayState extends MusicBeatState
 				switch (swagCounter)
 				{
 					case 0:
-						try FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
-						
+						try {
+						    FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
+						}
 						tick = THREE;
 					case 1:
 						countdownReady = createCountdownSprite(introAlts[0], antialias);
-						try FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
+						try {
+						    FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
+						}
 						tick = TWO;
 					case 2:
 						countdownSet = createCountdownSprite(introAlts[1], antialias);
-						try FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
+						try {
+						    FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
+						}
 						tick = ONE;
 					case 3:
 						countdownGo = createCountdownSprite(introAlts[2], antialias);
-						try FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
+						try {
+						    FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
+						}
 						tick = GO;
 					case 4:
 					    tick = START;
@@ -3694,16 +3701,35 @@ class PlayState extends MusicBeatState
 	}
 	public function initHScript(file:String)
 	{
+	    var newScript:HScript = null;
 		try
 		{
-			var newScript:HScript = new HScript(null, file);
+			newScript = new HScript(null, file);
 			hscriptArray.push(newScript);
-			if(newScript.exists('onCreate')) newScript.call('onCreate');
-			trace('initialized sscript interp successfully: $file');
+			if(newScript.exists('onCreate'))
+			{
+				var callValue = newScript.call('onCreate');
+				if(!callValue.succeeded)
+				{
+					for (e in callValue.exceptions)
+						if (e != null)
+							addTextToDebug('ERROR ($file: onCreate) - ${e.message.substr(0, e.message.indexOf('\n'))}', FlxColor.RED);
+					newScript.active = false;
+					hscriptArray.remove(newScript);
+					trace('failed to initialize sscript interp!!! ($file)');
+				}
+				else trace('initialized sscript interp successfully: $file');
+			}
+
 		}
 		catch(e)
 		{
-			addTextToDebug('ERROR ($file) - ' + e.toString(), FlxColor.RED);
+			addTextToDebug('ERROR ($file) - ' + e.message.substr(0, e.message.indexOf('\n')), FlxColor.RED);
+			if(newScript != null)
+			{
+				newScript.active = false;
+				hscriptArray.remove(newScript);
+			}
 		}
 	}
 	#end

@@ -7,6 +7,12 @@
       "url": "https://github.com/Aidan63/linc_discord-rpc"
     },
     {
+      "name": "linc_luajit",
+      "type": "git",
+      "ref": "master",
+      "url": "https://github.com/Sirox228/linc_luajit"
+    },
+    {
       "name": "tjson",
       "type": "haxelib",
       "version": null
@@ -40,7 +46,7 @@
     {
       "name": "hxCodec",
       "type": "git",
-      "ref": "b0cf283800e69d949f5b9d0473c4f341898efdcd",
+      "ref": "main",
       "url": "https://github.com/Prohack101010/hxCodec-2.6.0-with-MP4Handler"
     },
     {
@@ -89,12 +95,6 @@
       "dir": "src",
       "ref": "57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2",
       "url": "https://gitlab.com/haxe-grig/grig.audio.git"
-    },
-    {
-      "name": "linc_luajit",
-      "type": "git",
-      "ref": "master",
-      "url": "https://github.com/superpowers04/linc_luajit"
     }
   ]
 }
