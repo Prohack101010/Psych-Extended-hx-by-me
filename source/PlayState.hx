@@ -314,7 +314,7 @@ class PlayState extends MusicBeatState
 
     public static var nextReloadAll:Bool = false;
     
-    public var mobileControls:MobileControls;
+    public var mobileControls:Bool = MusicBeatState.mobilec.visible;
     
 	override public function create()
 	{
@@ -1891,8 +1891,8 @@ class PlayState extends MusicBeatState
 		}*/
 		callOnScripts('onUpdate', [elapsed]);
 		
-		if (MusicBeatState.mobilec.visible != mobileControls.visible)
-		    MusicBeatState.mobilec.visible = mobileControls.visible;
+		if (MusicBeatState.mobilec.visible != mobileControls)
+		    MusicBeatState.mobilec.visible = mobileControls;
 
 		if(!inCutscene) {
 			var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4 * cameraSpeed * playbackRate, 0, 1);

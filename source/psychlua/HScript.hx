@@ -151,9 +151,7 @@ class HScript extends SScript
 		set('parentLua', parentLua);
 		set('this', this);
 		set('game', PlayState.instance);
-		set('Controls.instance', Controls);
 		set('game.controls', Controls);
-		set('game.mobileControls', MusicBeatState.mobilec);
 		set('buildTarget', FunkinLua.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
@@ -341,7 +339,7 @@ class HScriptBase
 		interp.variables.set('game', PlayState.instance);
 		interp.variables.set('Paths', Paths);
 		interp.variables.set('Conductor', Conductor);
-		interp.variables.set('ClientPrefs', ClientPrefs);
+		interp.variables.set('ClientPrefs', ClientPrefs.data);
 		interp.variables.set('Character', Character);
 		interp.variables.set('Alphabet', Alphabet);
 		interp.variables.set('CustomSubstate', CustomSubstate);
