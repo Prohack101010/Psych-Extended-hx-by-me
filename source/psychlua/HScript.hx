@@ -153,7 +153,7 @@ class HScript extends SScript
 		set('game', PlayState.instance);
 		set('Controls.instance', Controls);
 		set('game.controls', Controls);
-		set('game.mobileControls', PlayState.instance.mobilec);
+		set('game.mobileControls', MusicBeatState.mobilec);
 		set('buildTarget', FunkinLua.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
