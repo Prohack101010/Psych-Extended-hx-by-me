@@ -313,6 +313,9 @@ class PlayState extends MusicBeatState
 	public var cpuControlled_opponent:Bool = false;
 
     public static var nextReloadAll:Bool = false;
+    
+    public var mobileControls:MobileControls;
+    
 	override public function create()
 	{
 	    MobileCType = 'DEFAULT';
@@ -1887,6 +1890,9 @@ class PlayState extends MusicBeatState
 			iconP1.swapOldIcon();
 		}*/
 		callOnScripts('onUpdate', [elapsed]);
+		
+		if (mobileControls.visible != MusicBeatState.mobilec.visible)
+		    MusicBeatState.mobilec.visible = mobileControls.visible;
 
 		if(!inCutscene) {
 			var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4 * cameraSpeed * playbackRate, 0, 1);

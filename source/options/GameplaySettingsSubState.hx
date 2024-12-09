@@ -29,6 +29,7 @@ using StringTools;
 
 class GameplaySettingsSubState extends BaseOptionsMenu
 {
+    final lastModpack:String = ClientPrefs.data.Modpack;
 	public function new()
 	{
 		title = 'Gameplay Settings';
@@ -153,15 +154,17 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 	
 	override public function destroy() {
 		super.destroy();
-		TitleState.initialized = false;
-		TitleState.closedState = false;
-		FlxG.sound.music.fadeOut(0.3);
-		if(FreeplayState.vocals != null)
-		{
-			FreeplayState.vocals.fadeOut(0.3);
-			FreeplayState.vocals = null;
-		}
 		ClientPrefs.saveSettings();
+		if (ClientPrefs.data.Modpack != lastModpack) {
+    		TitleState.initialized = false;
+    		TitleState.closedState = false;
+    		FlxG.sound.music.fadeOut(0.3);
+    		if(FreeplayState.vocals != null)
+    		{
+    			FreeplayState.vocals.fadeOut(0.3);
+    			FreeplayState.vocals = null;
+    		}
+		}
 		FlxG.camera.fade(FlxColor.BLACK, 0.5, false, FlxG.resetGame, false);
 	}
 
