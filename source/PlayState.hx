@@ -1891,7 +1891,7 @@ class PlayState extends MusicBeatState
 		}*/
 		callOnScripts('onUpdate', [elapsed]);
 		
-		if (mobileControls.visible != MusicBeatState.mobilec.visible)
+		if (MusicBeatState.mobilec.visible != mobileControls.visible)
 		    MusicBeatState.mobilec.visible = mobileControls.visible;
 
 		if(!inCutscene) {
