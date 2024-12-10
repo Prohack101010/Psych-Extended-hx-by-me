@@ -25,7 +25,7 @@ class ShaderFunctions
 			if(!ClientPrefs.data.shaders) return false;
 			
 			#if (!flash && MODS_ALLOWED && sys)
-			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader))
+			if(!PlayState.instance.runtimeShaders.exists(shader) && !funk.initLuaShader(shader))
 			{
 				FunkinLua.luaTrace('setSpriteShader: Shader $shader is missing!', false, false, FlxColor.RED);
 				return false;
