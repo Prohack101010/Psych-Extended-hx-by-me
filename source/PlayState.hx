@@ -3967,16 +3967,15 @@ class PlayState extends MusicBeatState
 		return null;
 		#end
 	}
-	public function initLuaShader(name:String, ?glslVersion:Int = 120)
+	public function initLuaShader(name:String)
 	{
 		if(!ClientPrefs.data.shaders) return false;
-		#if (MODS_ALLOWED && !flash && sys)
 		if(runtimeShaders.exists(name))
 		{
 			FlxG.log.warn('Shader $name was already initialized!');
 			return true;
 		}
-		var foldersToCheck:Array<String> = [Paths.mods('shaders/')];
+		var foldersToCheck:Array<String> = [Paths.getPreloadPath('shaders/')];
 		if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
 			foldersToCheck.insert(0, Paths.mods(Mods.currentModDirectory + '/shaders/'));
 		for(mod in Mods.getGlobalMods())
@@ -3995,7 +3994,7 @@ class PlayState extends MusicBeatState
 					found = true;
 				}
 				else frag = null;
-				if(FileSystem.exists(vert))
+				if (FileSystem.exists(vert))
 				{
 					vert = File.getContent(vert);
 					found = true;
@@ -4004,15 +4003,12 @@ class PlayState extends MusicBeatState
 				if(found)
 				{
 					runtimeShaders.set(name, [frag, vert]);
-					//trace('Found shader $name!');
+					//trace('Finally Found shader $name!');
 					return true;
 				}
 			}
 		}
 		FlxG.log.warn('Missing shader $name .frag AND .vert files!');
-		#else
-		FlxG.log.warn('This platform doesn\'t support Runtime Shaders!', false, false, FlxColor.RED);
-		#end
 		return false;
 	}
 	#end
