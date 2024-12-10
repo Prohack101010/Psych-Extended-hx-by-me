@@ -3080,11 +3080,10 @@ class ChartingState extends MusicBeatState
 		//make it look sexier if possible
 		try {
 			if (Difficulty.getString() != Difficulty.getDefault()) {
-				if(Difficulty.getString() == null){
+				if(Difficulty.getString() == null)
 					PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
-				}else{
+				else
 					PlayState.SONG = Song.loadFromJson(song.toLowerCase() + "-" + Difficulty.getString(), song.toLowerCase());
-				}
 			}
         else PlayState.SONG = Song.loadFromJson(song.toLowerCase() + postfix, song.toLowerCase());
 			MusicBeatState.resetState();
