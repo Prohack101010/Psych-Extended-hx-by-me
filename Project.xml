@@ -54,6 +54,8 @@
     	<define name="BASE_GAME_ASSETS" />
 	</section>
 	<define name="MODS_ALLOWED" if="desktop || mobile" />
+	<define name="HSCRIPT_ALLOWED" if="desktop || mobile" />
+	<define name="HSCRIPTBASE_ALLOWED" if="desktop || mobile" />
 	<define name="LUA_ALLOWED" if="desktop || mobile"/>
 	<define name="ACHIEVEMENTS_ALLOWED" />
 	<define name="VIDEOS_ALLOWED" if="web || windows || mobile" unless="32bits"/>
@@ -134,10 +136,10 @@
     <haxelib name="extension-androidtools" if="android"/>
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="discord_rpc" if="desktop"/>
-	<haxelib name="SScript" />
+	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
 	<haxedef name="openflPos" />
 	<haxedef name="hscriptPos" />
-	<haxelib name="hscript" />
+	<haxelib name="hscript" if="HSCRIPTBASE_ALLOWED"/>
 	<define name="hscriptPos" />
 	
 	<!-- Extra packages-->

@@ -97,7 +97,6 @@ using StringTools;
 
 class PlayState extends MusicBeatState
 {
-    public var mobilecCreated:Bool = false;
 	public static var STRUM_X = 48.5;
 	public static var STRUM_X_MIDDLESCROLL = -278;
 	
@@ -122,7 +121,7 @@ class PlayState extends MusicBeatState
 	public var gfMap:Map<String, Character> = new Map<String, Character>();
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 	
-	#if (MODS_ALLOWED && SScript)
+	#if HSCRIPT_ALLOWED
 	public var hscriptArray:Array<HScript> = [];
 	#end
 	
@@ -314,9 +313,6 @@ class PlayState extends MusicBeatState
 	public var cpuControlled_opponent:Bool = false;
 
     public static var nextReloadAll:Bool = false;
-    
-    public var mobileControls:Bool = false;
-    
 	override public function create()
 	{
 	    MobileCType = 'DEFAULT';
@@ -669,7 +665,7 @@ class PlayState extends MusicBeatState
 			startLuasNamed('custom_events/' + event + '.lua');
 		#end
 		
-		#if (MODS_ALLOWED && SScript)
+		#if HSCRIPT_ALLOWED
 		for (notetype in noteTypes)
 			startHScriptsNamed('custom_notetypes/' + notetype + '.hx');
 		for (event in eventsPushed)
@@ -770,7 +766,6 @@ class PlayState extends MusicBeatState
 		if (MobileCType == 'DEFAULT') {
     		addMobileControls();
     		MusicBeatState.mobilec.visible = false;
-    		mobileControls = false;
     	    if (ClientPrefs.data.hitboxmode == 'New' && !ClientPrefs.data.hitboxhint) { MusicBeatState.mobilec.alpha = 0.000001; }
 		}
 		startingSong = true;
@@ -783,7 +778,7 @@ class PlayState extends MusicBeatState
 			startLuasNamed('custom_events/' + event + '.lua');
 		#end
 		
-		#if (MODS_ALLOWED && SScript)
+		#if HSCRIPT_ALLOWED
 		for (notetype in noteTypes)
 			startHScriptsNamed('custom_notetypes/' + notetype + '.hx');
 		for (event in eventsPushed)
@@ -1010,7 +1005,7 @@ class PlayState extends MusicBeatState
 		#end
 		
 		// HScript
-		#if (MODS_ALLOWED && SScript)
+		#if HSCRIPT_ALLOWED
 		var doPush:Bool = false;
 		var scriptFile:String = 'characters/' + name + '.hx';
 		var replacePath:String = Paths.modFolders(scriptFile);
@@ -1198,9 +1193,7 @@ class PlayState extends MusicBeatState
 			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
 			if (MobileCType == 'DEFAULT') {
     			MusicBeatState.mobilec.visible = true;
-    			mobileControls = true;
     			if (MusicBeatState.checkHitbox != true) MusicBeatState.mobilec.alpha = ClientPrefs.data.VirtualPadAlpha; //better for pc build
-    			 mobilecCreated = true;
     		}
 			generateStaticArrows(0);
 			generateStaticArrows(1);
@@ -2005,9 +1998,6 @@ class PlayState extends MusicBeatState
 
 			// Conductor.lastSongPos = FlxG.sound.music.time;
 		}
-		
-		if (mobileControls == true && mobilecCreated) MusicBeatState.mobilec.visible = true;
-		else if (mobileControls == false && mobilecCreated) MusicBeatState.mobilec.visible = false;
 
 		if (camZooming)
 		{
@@ -2717,7 +2707,6 @@ class PlayState extends MusicBeatState
 		}
 
 		MusicBeatState.mobilec.visible = false;
-		mobileControls = false;
 		timeBarBG.visible = false;
 		timeBar.visible = false;
 		timeTxt.visible = false;
@@ -3545,7 +3534,7 @@ class PlayState extends MusicBeatState
 		FunkinLua.customFunctions.clear();
 		#end
 		
-		#if (MODS_ALLOWED && SScript)
+		#if HSCRIPT_ALLOWED
 		for (script in hscriptArray)
 			if(script != null)
 			{
@@ -3694,7 +3683,7 @@ class PlayState extends MusicBeatState
 	}
 	#end
 	
-	#if (MODS_ALLOWED && SScript)
+	#if HSCRIPT_ALLOWED
 	public function startHScriptsNamed(scriptFile:String)
 	{
 		var scriptToLoad:String = Paths.modFolders(scriptFile);
@@ -3791,7 +3780,7 @@ class PlayState extends MusicBeatState
 	
 	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
 		var returnVal:Dynamic = psychlua.FunkinLua.Function_Continue;
-		#if (MODS_ALLOWED && SScript)
+		#if HSCRIPT_ALLOWED
 		if(exclusions == null) exclusions = new Array();
 		if(excludeValues == null) excludeValues = new Array();
 		excludeValues.push(psychlua.FunkinLua.Function_Continue);
@@ -3851,7 +3840,7 @@ class PlayState extends MusicBeatState
 	}
 	
 	public function setOnHScript(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
-		#if (MODS_ALLOWED && SScript)
+		#if HSCRIPT_ALLOWED
 		if(exclusions == null) exclusions = [];
 		for (script in hscriptArray) {
 			if(exclusions.contains(script.origin))

@@ -77,7 +77,7 @@ class FunkinLua {
 	public var hscript:HScript = null;
 	#end
 	
-	#if hscript
+	#if HSCRIPT_BASE_ALLOWED
 	public var hscriptBase:HScriptBase = null;
 	#end
 	
@@ -1615,7 +1615,7 @@ class FunkinLua {
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
 		#if (SScript >= "3.0.0") HScript.implement(this); #end
 		#if android AndroidFunctions.implement(this); #end
-		#if hscript HScriptBase.implement(this); #end
+		#if HSCRIPT_BASE_ALLOWED HScriptBase.implement(this); #end
 		DeprecatedFunctions.implement(this);
 		ReflectionFunctions.implement(this);
 		CustomFunctions.implement(this);
@@ -1726,7 +1726,7 @@ class FunkinLua {
 		}
 		#end
 		
-		#if hscript
+		#if HSCRIPT_BASE_ALLOWED
 		if(hscriptBase != null) hscriptBase.interp = null;
 		hscriptBase = null;
 		#end
@@ -1746,6 +1746,8 @@ class FunkinLua {
 		return 'browser';
 		#elseif android
 		return 'android';
+		#elseif ios
+		return 'ios';
 		#elseif switch
 		return 'switch';
 		#else

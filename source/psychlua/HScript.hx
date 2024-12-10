@@ -1,18 +1,18 @@
 package psychlua;
 
-import tea.SScript;
 import flixel.FlxBasic;
 import psychlua.FunkinLua;
 import psychlua.CustomSubstate;
 
-#if hscript
+#if HSCRIPT_BASE_ALLOWED
 import hscript.Parser;
 import hscript.Interp;
 import hscript.Expr;
 import haxe.Exception;
 #end
 
-#if (SScript >= "3.0.0")
+#if (HSCRIPT_ALLOWED && SScript >= "3.0.0")
+import tea.SScript;
 class HScript extends SScript
 {
 	public var parentLua:FunkinLua;
@@ -151,7 +151,6 @@ class HScript extends SScript
 		set('parentLua', parentLua);
 		set('this', this);
 		set('game', PlayState.instance);
-		set('game.controls', Controls);
 		set('buildTarget', FunkinLua.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
@@ -299,10 +298,10 @@ class HScript extends SScript
 }
 #end
 
-#if hscript
+#if HSCRIPT_BASE_ALLOWED
 class HScriptBase
 {
-	#if hscript
+	#if HSCRIPT_BASE_ALLOWED
 	public static var parser:Parser = new Parser();
 	public var interp:Interp;
 
@@ -316,7 +315,7 @@ class HScriptBase
 	
 	public static function initHaxeModule(parent:FunkinLua)
 	{
-		#if hscript
+		#if HSCRIPT_BASE_ALLOWED
 		if(parent.hscriptBase == null)
 		{
 			trace('initializing haxe interp for: ${parent.scriptName}');
@@ -437,7 +436,7 @@ class HScriptBase
 	{
 		funk.addLocalCallback("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null) {
 			var retVal:Dynamic = null;
-			#if hscript
+			#if HSCRIPT_BASE_ALLOWED
 			initHaxeModule(funk);
 			try {
 				if(varsToBring != null)
@@ -471,7 +470,7 @@ class HScriptBase
 			}
 		});
 		funk.addLocalCallback("addHaxeLibrary", function(libName:String, ?libPackage:String = '') {
-			#if hscript
+			#if HSCRIPT_BASE_ALLOWED
 			initHaxeModule(funk);
 			try {
 				var str:String = '';
