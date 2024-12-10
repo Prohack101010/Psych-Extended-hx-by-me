@@ -995,7 +995,6 @@ class ChartingState extends MusicBeatState
 						noteTypeMap.set(fileToCheck, key);
 						noteTypeIntMap.set(key, fileToCheck);
 						key++;
-						}
 					}
 				}
 			}
