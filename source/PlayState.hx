@@ -992,15 +992,8 @@ class PlayState extends MusicBeatState
 
 		if(doPush)
 		{
-			for (script in luaArray)
-			{
-				if(script.scriptName == luaFile)
-				{
-					doPush = false;
-					break;
-				}
-			}
-			if(doPush) new FunkinLua(luaFile);
+			for (script in luaArray) if(script.scriptName == luaFile) return;
+			new FunkinLua(luaFile);
 		}
 		#end
 		
@@ -3525,8 +3518,7 @@ class PlayState extends MusicBeatState
 
 	override function destroy() {
 	    #if LUA_ALLOWED
-		for (i in 0...luaArray.length) {
-			var lua:FunkinLua = luaArray[0];
+		for (lua in luaArray) {
 			lua.call('onDestroy', []);
 			lua.stop();
 		}
@@ -3744,35 +3736,23 @@ class PlayState extends MusicBeatState
 	}
 
 	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
-		var returnVal:Dynamic = FunkinLua.Function_Continue;
+		var returnVal = FunkinLua.Function_Continue;
 		#if LUA_ALLOWED
 		if(args == null) args = [];
 		if(exclusions == null) exclusions = [];
-		if(excludeValues == null) excludeValues = [FunkinLua.Function_Continue];
+		if(excludeValues == null) excludeValues = [];
+		excludeValues.push(FunkinLua.Function_Continue);
 
-		var len:Int = luaArray.length;
-		var i:Int = 0;
-		while(i < len)
-		{
-			var script:FunkinLua = luaArray[i];
+		for (script in luaArray) {
 			if(exclusions.contains(script.scriptName))
-			{
-				i++;
 				continue;
-			}
 
 			var myValue:Dynamic = script.call(funcToCall, args);
-			if((myValue == FunkinLua.Function_StopLua || myValue == FunkinLua.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
-			{
-				returnVal = myValue;
+			if(myValue == FunkinLua.Function_StopLua && !ignoreStops)
 				break;
-			}
 			
 			if(myValue != null && !excludeValues.contains(myValue))
 				returnVal = myValue;
-				
-			if(!script.closed) i++;
-			else len--;
 		}
 		#end
 		return returnVal;
