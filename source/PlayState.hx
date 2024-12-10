@@ -97,6 +97,7 @@ using StringTools;
 
 class PlayState extends MusicBeatState
 {
+    public var mobilecCreated:Bool = false;
 	public static var STRUM_X = 48.5;
 	public static var STRUM_X_MIDDLESCROLL = -278;
 	
@@ -1199,6 +1200,7 @@ class PlayState extends MusicBeatState
     			MusicBeatState.mobilec.visible = true;
     			mobileControls = true;
     			if (MusicBeatState.checkHitbox != true) MusicBeatState.mobilec.alpha = ClientPrefs.data.VirtualPadAlpha; //better for pc build
+    			 mobilecCreated = true;
     		}
 			generateStaticArrows(0);
 			generateStaticArrows(1);
@@ -2004,8 +2006,8 @@ class PlayState extends MusicBeatState
 			// Conductor.lastSongPos = FlxG.sound.music.time;
 		}
 		
-		if (mobileControls == true && MusicBeatState.mobilec.visible == false) MusicBeatState.mobilec.visible = true;
-		else if (mobileControls == false && MusicBeatState.mobilec.visible == true) MusicBeatState.mobilec.visible = false;
+		if (mobileControls == true && mobilecCreated) MusicBeatState.mobilec.visible = true;
+		else if (mobileControls == false && mobilecCreated) MusicBeatState.mobilec.visible = false;
 
 		if (camZooming)
 		{
