@@ -314,7 +314,7 @@ class PlayState extends MusicBeatState
 
     public static var nextReloadAll:Bool = false;
     
-    public var mobileControls:Bool = MusicBeatState.mobilec.visible;
+    public var mobileControls:Bool = false;
     
 	override public function create()
 	{
@@ -769,6 +769,7 @@ class PlayState extends MusicBeatState
 		if (MobileCType == 'DEFAULT') {
     		addMobileControls();
     		MusicBeatState.mobilec.visible = false;
+    		mobileControls = false;
     	    if (ClientPrefs.data.hitboxmode == 'New' && !ClientPrefs.data.hitboxhint) { MusicBeatState.mobilec.alpha = 0.000001; }
 		}
 		startingSong = true;
@@ -1196,6 +1197,7 @@ class PlayState extends MusicBeatState
 			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
 			if (MobileCType == 'DEFAULT') {
     			MusicBeatState.mobilec.visible = true;
+    			mobileControls = true;
     			if (MusicBeatState.checkHitbox != true) MusicBeatState.mobilec.alpha = ClientPrefs.data.VirtualPadAlpha; //better for pc build
     		}
 			generateStaticArrows(0);
@@ -1890,9 +1892,6 @@ class PlayState extends MusicBeatState
 			iconP1.swapOldIcon();
 		}*/
 		callOnScripts('onUpdate', [elapsed]);
-		
-		if (MusicBeatState.mobilec.visible != mobileControls)
-		    MusicBeatState.mobilec.visible = mobileControls;
 
 		if(!inCutscene) {
 			var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4 * cameraSpeed * playbackRate, 0, 1);
@@ -2004,6 +2003,9 @@ class PlayState extends MusicBeatState
 
 			// Conductor.lastSongPos = FlxG.sound.music.time;
 		}
+		
+		if (mobileControls == true && MusicBeatState.mobilec.visible == false) MusicBeatState.mobilec.visible = true;
+		else if (mobileControls == false && MusicBeatState.mobilec.visible == true) MusicBeatState.mobilec.visible = false;
 
 		if (camZooming)
 		{
@@ -2713,6 +2715,7 @@ class PlayState extends MusicBeatState
 		}
 
 		MusicBeatState.mobilec.visible = false;
+		mobileControls = false;
 		timeBarBG.visible = false;
 		timeBar.visible = false;
 		timeTxt.visible = false;

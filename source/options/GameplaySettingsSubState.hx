@@ -164,8 +164,8 @@ class GameplaySettingsSubState extends BaseOptionsMenu
     			FreeplayState.vocals.fadeOut(0.3);
     			FreeplayState.vocals = null;
     		}
+    		FlxG.camera.fade(FlxColor.BLACK, 0.5, false, FlxG.resetGame, false);
 		}
-		FlxG.camera.fade(FlxColor.BLACK, 0.5, false, FlxG.resetGame, false);
 	}
 
 	function onChangeHitsoundVolume()
