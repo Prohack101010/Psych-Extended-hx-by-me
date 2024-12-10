@@ -1685,8 +1685,7 @@ class FunkinLua {
 			var result:Dynamic = cast Convert.fromLua(lua, -1);
 			if (result == null) result = Function_Continue;
 
-			Lua.pop(lua, 1);
-			if(closed) stop();
+			if(!closed) Lua.pop(lua, 1);
 			return result;
 		}
 		catch (e:Dynamic) {
