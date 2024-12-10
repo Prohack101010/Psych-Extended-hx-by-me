@@ -25,7 +25,7 @@ class ShaderFunctions
 			if(!ClientPrefs.data.shaders) return false;
 			
 			#if (!flash && MODS_ALLOWED && sys)
-			if(!game.runtimeShaders.exists(shader) && !initLuaShader(shader))
+			if(!PlayState.instance.runtimeShaders.exists(shader) && !initLuaShader(shader))
 			{
 				FunkinLua.luaTrace('setSpriteShader: Shader $shader is missing!', false, false, FlxColor.RED);
 				return false;
@@ -38,7 +38,7 @@ class ShaderFunctions
 			}
 			
 			if(leObj != null) {
-				var arr:Array<String> = game.runtimeShaders.get(shader);
+				var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
 				leObj.shader = new FlxRuntimeShader(arr[0], arr[1]);
 				return true;
 			}
