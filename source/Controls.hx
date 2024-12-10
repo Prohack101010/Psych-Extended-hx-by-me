@@ -1248,9 +1248,9 @@ class Controls extends FlxActionSet
 	}
 }
 
-class GetControlsCass
+class GetControlsCass extends Controls
 {
-    function new()
+    function new():Controls
     {
         return Controls;
     }
