@@ -145,7 +145,7 @@ enum KeyboardScheme
 class Controls extends FlxActionSet
 {
     //0.7 Support
-    public static var instance:Controls;
+    public static var instance:GetControlsCass;
     
     public static var isInSubstate:Bool = false;
 	var _ui_up = new FlxActionDigital(Action.UI_UP);
@@ -1246,4 +1246,12 @@ class Controls extends FlxActionSet
 	{
 		return input.device == GAMEPAD && (deviceID == FlxInputDeviceID.ALL || input.deviceID == deviceID);
 	}
+}
+
+class GetControlsCass
+{
+    function new()
+    {
+        return Controls;
+    }
 }
