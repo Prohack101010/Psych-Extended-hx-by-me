@@ -61,26 +61,34 @@ class HScript extends SScript
 
 		// Some very commonly used classes
 		set('FlxG', flixel.FlxG);
+		set('FlxMath', flixel.math.FlxMath);
 		set('FlxSprite', flixel.FlxSprite);
+		set('FlxText', flixel.text.FlxText);
 		set('FlxCamera', flixel.FlxCamera);
 		set('FlxTimer', flixel.util.FlxTimer);
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
 		set('FlxColor', CustomFlxColor);
+		set('Countdown', backend.BaseStage.Countdown);
 		set('PlayState', PlayState);
 		set('Paths', Paths);
 		set('Conductor', Conductor);
 		set('ClientPrefs', ClientPrefs);
+		#if ACHIEVEMENTS_ALLOWED
+		set('Achievements', Achievements);
+		#end
 		set('Character', Character);
 		set('Alphabet', Alphabet);
 		set('Note', Note);
-		set('CustomSubstate', CustomSubstate);
-		set('Countdown', backend.BaseStage.Countdown);
+		set('CustomSubstate', psychlua.CustomSubstate);
 		#if (!flash && sys)
 		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
 		#end
 		set('ShaderFilter', openfl.filters.ShaderFilter);
 		set('StringTools', StringTools);
+		#if flxanimate
+		set('FlxAnimate', FlxAnimate);
+		#end
 
 		// Functions & Variables
 		set('setVar-SScript', function(name:String, value:Dynamic)
@@ -149,8 +157,13 @@ class HScript extends SScript
 			}
 		});
 		set('parentLua', parentLua);
+		#else
+		set('parentLua', null);
+		#end
 		set('this', this);
-		set('game', PlayState.instance);
+		set('game', FlxG.state);
+		set('controls', Controls);
+
 		set('buildTarget', FunkinLua.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
@@ -162,11 +175,12 @@ class HScript extends SScript
 		set('Function_StopAll', FunkinLua.Function_StopAll);
 		
 		set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
+		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
+		set('remove', function(obj:FlxBasic, ?splice:Bool = false) PlayState.instance.remove(obj, splice));
+		
 		set('addBehindGF', function(obj:FlxBasic) PlayState.instance.addBehindGF(obj));
 		set('addBehindDad', function(obj:FlxBasic) PlayState.instance.addBehindDad(obj));
 		set('addBehindBF', function(obj:FlxBasic) PlayState.instance.addBehindBF(obj));
-		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
-		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
 		#end
 	}
 
