@@ -23,7 +23,7 @@ class CustomSubstate extends MusicBeatSubstate
 					PlayState.instance.vocals.pause();
 				}
 			}
-			game.openSubState(new CustomSubstate(name));
+			PlayState.instance.openSubState(new CustomSubstate(name));
 		});
 		Lua_helper.add_callback(lua, "closeCustomSubstate", function() {
 			if(CustomSubstate.instance != null)
