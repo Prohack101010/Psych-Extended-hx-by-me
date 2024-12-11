@@ -156,6 +156,7 @@ class HScript extends SScript
 				FunkinLua.luaTrace(msg, parentLua == null, false, FlxColor.RED);
 			}
 		});
+		#if LUA_ALLOWED
 		set('parentLua', parentLua);
 		#else
 		set('parentLua', null);
