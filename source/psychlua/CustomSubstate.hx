@@ -11,8 +11,31 @@ class CustomSubstate extends MusicBeatSubstate
 	{
 		#if LUA_ALLOWED
 		var lua = funk.lua;
-		Lua_helper.add_callback(lua, "openCustomSubstate", openCustomSubstate);
-		Lua_helper.add_callback(lua, "closeCustomSubstate", closeCustomSubstate);
+		// 0.6.3 lua custom substate functions
+		Lua_helper.add_callback(lua, "openCustomSubstate", function(name:String, ?pauseGame:Bool = false) {
+			if(pauseGame)
+			{
+				PlayState.instance.persistentUpdate = false;
+				PlayState.instance.persistentDraw = true;
+				PlayState.instance.paused = true;
+				if(FlxG.sound.music != null) {
+					FlxG.sound.music.pause();
+					PlayState.instance.vocals.pause();
+				}
+			}
+			game.openSubState(new CustomSubstate(name));
+		});
+		Lua_helper.add_callback(lua, "closeCustomSubstate", function() {
+			if(CustomSubstate.instance != null)
+			{
+				PlayState.instance.closeSubState();
+				CustomSubstate.instance = null;
+				return true;
+			}
+			return false;
+		});
+		
+		//Useless
 		Lua_helper.add_callback(lua, "insertToCustomSubstate", insertToCustomSubstate);
 		#end
 	}
