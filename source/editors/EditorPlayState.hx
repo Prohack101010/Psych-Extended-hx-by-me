@@ -364,9 +364,12 @@ class EditorPlayState extends MusicBeatState
 		if (startingSong) {
 			timerToStart -= elapsed * 1000;
 			Conductor.songPosition = startPos - timerToStart;
-			if(timerToStart < 0) startSong();
+			if(timerToStart < 0) {
+				startSong();
+			}
+		} else {
+			Conductor.songPosition += elapsed * 1000;
 		}
-		else Conductor.songPosition += elapsed * 1000;
 
 		if (unspawnNotes[0] != null)
 		{
