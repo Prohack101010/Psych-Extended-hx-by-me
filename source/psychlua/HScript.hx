@@ -125,6 +125,7 @@ class HScript extends SScript
 				if(script != null && script.lua != null && !script.closed)
 					Lua_helper.add_callback(script.lua, name, func);
 			#end
+			FunkinLua.customFunctions.set(name, func);
 		});
 
 		// tested
