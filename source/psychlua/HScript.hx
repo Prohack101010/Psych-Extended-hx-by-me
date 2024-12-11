@@ -395,6 +395,7 @@ class HScriptBase
 		// tested
 		interp.variables.set('createCallback', function(name:String, func:Dynamic, ?funk:FunkinLua = null)
 		{
+		    var lua:State = funk.lua;
 			if(funk == null) funk = parentLua;
 			Lua_helper.add_callback(lua, name, func);
 		});
@@ -450,6 +451,7 @@ class HScriptBase
 	#if LUA_ALLOWED
 	public static function implement(funk:FunkinLua)
 	{
+	    var lua:State = funk.lua;
 		Lua_helper.add_callback(lua, "runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null) {
 			var retVal:Dynamic = null;
 			#if HSCRIPT_BASE_ALLOWED
