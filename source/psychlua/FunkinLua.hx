@@ -1844,7 +1844,6 @@ class FunkinLua {
 	public function addLocalCallback(name:String, myFunction:Dynamic)
 	{
 		#if LUA_ALLOWED
-		callbacks.set(name, myFunction);
 		Lua_helper.add_callback(lua, name, null); //just so that it gets called
 		#end
 	}
