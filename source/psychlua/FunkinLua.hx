@@ -460,7 +460,7 @@ class FunkinLua {
 							game.luaArray.remove(luaInstance);
 							return;
 						}
-				return
+				return;
 			}
 			luaTrace("removeLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 		});
