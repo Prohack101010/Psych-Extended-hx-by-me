@@ -130,6 +130,7 @@ class Main extends Sprite
 
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		
+		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
 		Highscore.load();
 		ClientPrefs.loadDefaultKeys();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
