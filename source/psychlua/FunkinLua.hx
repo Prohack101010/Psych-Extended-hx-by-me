@@ -277,6 +277,8 @@ class FunkinLua {
 			if(args == null) args = [];
 			if(exclusions == null) exclusions = [];
 			PlayState.instance.callOnLuas(funcName, args, ignoreStops, exclusions);
+			return true;
+		});
 
         Lua_helper.add_callback(lua, "callOnHScript", function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops=false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null, ?excludeValues:Array<Dynamic> = null) {
 			if(excludeScripts == null) excludeScripts = [];
