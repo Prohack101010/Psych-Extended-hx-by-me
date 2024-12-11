@@ -259,7 +259,7 @@ class LuaUtils
 			return;
 		}
 
-		var target:FlxText = PlayState.instance.modchartTexts.get(tag);
+		var target:ModchartText = PlayState.instance.modchartTexts.get(tag);
 		target.kill();
 		PlayState.instance.remove(target, true);
 		target.destroy();

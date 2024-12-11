@@ -130,7 +130,7 @@ class PlayState extends MusicBeatState
 	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
 	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
 	public var modchartSounds:Map<String, FlxSound> = new Map<String, FlxSound>();
-	public var modchartTexts:Map<String, FlxText> = new Map<String, FlxText>();
+	public var modchartTexts:Map<String, ModchartText> = new Map<String, ModchartText>();
 	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
 	#end
 
@@ -1240,27 +1240,19 @@ class PlayState extends MusicBeatState
 				switch (swagCounter)
 				{
 					case 0:
-						try {
-						    FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
-						}
+						try FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
 						tick = THREE;
 					case 1:
 						countdownReady = createCountdownSprite(introAlts[0], antialias);
-						try {
-						    FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
-						}
+						try FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
 						tick = TWO;
 					case 2:
 						countdownSet = createCountdownSprite(introAlts[1], antialias);
-						try {
-						    FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
-						}
+						try FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
 						tick = ONE;
 					case 3:
 						countdownGo = createCountdownSprite(introAlts[2], antialias);
-						try {
-						    FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
-						}
+						try FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
 						tick = GO;
 					case 4:
 					    tick = START;
@@ -1631,10 +1623,10 @@ class PlayState extends MusicBeatState
 
     // called only once per different event (Used for precaching)
 	function eventPushed(event:EventNote) {
-	    eventPushedUnique(event);
 	    if(eventsPushed.contains(event.event)) {
 			return;
 		}
+		eventPushedUnique(event);
 		
 		stagesFunc(function(stage:BaseStage) stage.eventPushedUnique(event));
 	}
@@ -3408,7 +3400,7 @@ class PlayState extends MusicBeatState
 
 			if (!note.isSustainNote)
 			{
-				combo++;
+				combo += 1;
 				if(combo > 9999) combo = 9999;
 				popUpScore(note);
 			}

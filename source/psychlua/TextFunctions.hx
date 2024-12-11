@@ -6,14 +6,12 @@ class TextFunctions
 	{
 		var lua = funk.lua;
 		var game:PlayState = PlayState.instance;
+		var luaTrace = FunkinLua.luaTrace; //I'm lazy
+		
 		Lua_helper.add_callback(lua, "makeLuaText", function(tag:String, text:String, width:Int, x:Float, y:Float) {
 			tag = tag.replace('.', '');
 			LuaUtils.resetTextTag(tag);
-			var leText:FlxText = new FlxText(x, y, width, text, 16);
-			leText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			leText.cameras = [game.camHUD];
-			leText.scrollFactor.set();
-			leText.borderSize = 2;
+			var leText:ModchartText = new ModchartText(x, y, text, width);
 			game.modchartTexts.set(tag, leText);
 		});
 
@@ -24,7 +22,7 @@ class TextFunctions
 				obj.text = text;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextString: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("setTextString: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 		Lua_helper.add_callback(lua, "setTextSize", function(tag:String, size:Int) {
@@ -34,7 +32,7 @@ class TextFunctions
 				obj.size = size;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextSize: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("setTextSize: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 		Lua_helper.add_callback(lua, "setTextWidth", function(tag:String, width:Float) {
@@ -44,13 +42,16 @@ class TextFunctions
 				obj.fieldWidth = width;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextWidth: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("setTextWidth: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 		Lua_helper.add_callback(lua, "setTextBorder", function(tag:String, size:Int, color:String) {
 			var obj:FlxText = LuaUtils.getTextObject(tag);
 			if(obj != null)
 			{
+				var colorNum:Null<FlxColor> = FlxColor.fromString(color);
+				if(colorNum == null) colorNum = FlxColor.fromString('0x' + color);
+				if(colorNum == null) colorNum = FlxColor.WHITE; //fail safe
 				if(size > 0)
 				{
 					obj.borderStyle = OUTLINE;
@@ -58,20 +59,23 @@ class TextFunctions
 				}
 				else
 					obj.borderStyle = NONE;
-				obj.borderColor = CoolUtil.colorFromString(color);
+				obj.borderColor = colorNum;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextBorder: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("setTextBorder: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 		Lua_helper.add_callback(lua, "setTextColor", function(tag:String, color:String) {
 			var obj:FlxText = LuaUtils.getTextObject(tag);
 			if(obj != null)
 			{
-				obj.color = CoolUtil.colorFromString(color);
+				var colorNum:Null<FlxColor> = FlxColor.fromString(color);
+				if(colorNum == null) colorNum = FlxColor.fromString('0x' + color);
+				if(colorNum == null) colorNum = FlxColor.WHITE; //fail safe
+				obj.color = colorNum;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextColor: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("setTextColor: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 		Lua_helper.add_callback(lua, "setTextFont", function(tag:String, newFont:String) {
@@ -81,7 +85,7 @@ class TextFunctions
 				obj.font = Paths.font(newFont);
 				return true;
 			}
-			FunkinLua.luaTrace("setTextFont: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("setTextFont: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 		Lua_helper.add_callback(lua, "setTextItalic", function(tag:String, italic:Bool) {
@@ -91,7 +95,7 @@ class TextFunctions
 				obj.italic = italic;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextItalic: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("setTextItalic: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 		Lua_helper.add_callback(lua, "setTextAlignment", function(tag:String, alignment:String = 'left') {
@@ -108,7 +112,7 @@ class TextFunctions
 				}
 				return true;
 			}
-			FunkinLua.luaTrace("setTextAlignment: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("setTextAlignment: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 
@@ -118,7 +122,7 @@ class TextFunctions
 			{
 				return obj.text;
 			}
-			FunkinLua.luaTrace("getTextString: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("getTextString: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return null;
 		});
 		Lua_helper.add_callback(lua, "getTextSize", function(tag:String) {
@@ -127,7 +131,7 @@ class TextFunctions
 			{
 				return obj.size;
 			}
-			FunkinLua.luaTrace("getTextSize: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("getTextSize: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return -1;
 		});
 		Lua_helper.add_callback(lua, "getTextFont", function(tag:String) {
@@ -136,7 +140,7 @@ class TextFunctions
 			{
 				return obj.font;
 			}
-			FunkinLua.luaTrace("getTextFont: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("getTextFont: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return null;
 		});
 		Lua_helper.add_callback(lua, "getTextWidth", function(tag:String) {
@@ -145,27 +149,32 @@ class TextFunctions
 			{
 				return obj.fieldWidth;
 			}
-			FunkinLua.luaTrace("getTextWidth: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			luaTrace("getTextWidth: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return 0;
 		});
-
+		
 		Lua_helper.add_callback(lua, "addLuaText", function(tag:String) {
 			if(game.modchartTexts.exists(tag)) {
-				var shit:FlxText = game.modchartTexts.get(tag);
-				LuaUtils.getTargetInstance().add(shit);
+			    var shit:ModchartText = game.modchartTexts.get(tag);
+				if(!shit.wasAdded) {
+					LuaUtils.getTargetInstance().add(shit);
+					shit.wasAdded = true;
+					//trace('added a thing: ' + tag);
+				}
 			}
 		});
 		Lua_helper.add_callback(lua, "removeLuaText", function(tag:String, destroy:Bool = true) {
 			if(!game.modchartTexts.exists(tag)) {
 				return;
 			}
-
-			var pee:FlxText = game.modchartTexts.get(tag);
+			var pee:ModchartText = game.modchartTexts.get(tag);
 			if(destroy) {
 				pee.kill();
 			}
-
-			LuaUtils.getTargetInstance().remove(pee, true);
+			if(pee.wasAdded) {
+				LuaUtils.getTargetInstance().remove(pee, true);
+				pee.wasAdded = false;
+			}
 			if(destroy) {
 				pee.destroy();
 				game.modchartTexts.remove(tag);

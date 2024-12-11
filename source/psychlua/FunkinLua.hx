@@ -225,6 +225,30 @@ class FunkinLua {
 			if(func != null)
 				Lua_helper.add_callback(lua, name, func);
 		}
+		
+		// 0.6.3 custom lua substate functions
+		Lua_helper.add_callback(lua, "openCustomSubstate", function(name:String, ?pauseGame:Bool = false) {
+			if(pauseGame)
+			{
+				game.persistentUpdate = false;
+				game.persistentDraw = true;
+				game.paused = true;
+				if(FlxG.sound.music != null) {
+					FlxG.sound.music.pause();
+					game.vocals.pause();
+				}
+			}
+			game.openSubState(new CustomSubstate(name));
+		});
+		Lua_helper.add_callback(lua, "closeCustomSubstate", function() {
+			if(CustomSubstate.instance != null)
+			{
+				game.closeSubState();
+				CustomSubstate.instance = null;
+				return true;
+			}
+			return false;
+		});
 
 		//
 		Lua_helper.add_callback(lua, "getRunningScripts", function(){
@@ -429,12 +453,12 @@ class FunkinLua {
 					    if(luaInstance.scriptName == foundScript)
 						{
 							luaInstance.stop();
-							trace('Closing script ' + luaInstance.scriptName);
-							return true;
+							game.luaArray.remove(luaInstance);
+							return;
 						}
+				return
 			}
-			luaTrace('removeLuaScript: Script $luaFile isn\'t running!', false, false, FlxColor.RED);
-			return false;
+			luaTrace("removeLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 		});
 
 		Lua_helper.add_callback(lua, "loadSong", function(?name:String = null, ?difficultyNum:Int = -1) {
@@ -1597,9 +1621,17 @@ class FunkinLua {
 		});
 		//
 
-		Lua_helper.add_callback(lua, "debugPrint", function(text:Dynamic = '', color:String = 'WHITE') PlayState.instance.addTextToDebug(text, CoolUtil.colorFromString(color)));
+		Lua_helper.add_callback(lua, "debugPrint", function(text1:Dynamic = '', text2:Dynamic = '', text3:Dynamic = '', text4:Dynamic = '', text5:Dynamic = '') {
+			if (text1 == null) text1 = '';
+			if (text2 == null) text2 = '';
+			if (text3 == null) text3 = '';
+			if (text4 == null) text4 = '';
+			if (text5 == null) text5 = '';
+			luaTrace('' + text1 + text2 + text3 + text4 + text5, true, false);
+		});
 		
 		addLocalCallback("close", function() {
+		    PlayState.instance.luaArray.remove(this);
 			closed = true;
 			trace('Closing script $scriptName');
 			return closed;
@@ -1706,9 +1738,6 @@ class FunkinLua {
 	}
 	public function stop() {
 		#if LUA_ALLOWED
-		PlayState.instance.luaArray.remove(this);
-		closed = true;
-		
 		if(lua == null) {
 			return;
 		}
