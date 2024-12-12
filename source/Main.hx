@@ -130,22 +130,23 @@ class Main extends Sprite
 
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		
+		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
 		Highscore.load();
 		ClientPrefs.loadDefaultKeys();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 		addChild(new FlxGame(game.width, game.height, #if (mobile && MODS_ALLOWED) CopyState.checkExistingFiles() ? game.initialState : CopyState #else game.initialState #end, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
-        // NovaFlare Engine FPS Counter
+        //NovaFlare Engine
         fpsVarNova = new FPSNova(5, 5);
     	addChild(fpsVarNova);
     	if(fpsVarNova != null) { fpsVarNova.scaleX = fpsVarNova.scaleY = 1;	fpsVarNova.visible = false; }
     	
-    	// NF Engine FPS Counter
+    	//NF Engine V1.0.1
 		fpsVarNF = new FPSNF(10, 3, 0xFFFFFF);
     	addChild(fpsVarNF);
     	if(fpsVarNF != null) fpsVarNF.visible = false;
     	
-    	// PsychEngine FPS Counter
+    	//Psych Engine
     	fpsVar = new FPSPsych(10, 3, 0xFFFFFF);
     	addChild(fpsVar);
     	if(fpsVar != null) fpsVar.visible = false;

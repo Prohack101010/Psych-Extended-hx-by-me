@@ -538,7 +538,7 @@ class PlayState extends MusicBeatState
 		    for (file in FileSystem.readDirectory(folder))
 		    {
 				if(file.toLowerCase().endsWith('.lua'))
-					luaArray.push(new FunkinLua(folder + file));
+					new FunkinLua(folder + file);
 				if(file.toLowerCase().endsWith('.hx'))
 					initHScript(folder + file);
 			}
@@ -800,7 +800,7 @@ class PlayState extends MusicBeatState
 			for (file in FileSystem.readDirectory(folder))
 			{
 				if(file.toLowerCase().endsWith('.lua'))
-					luaArray.push(new FunkinLua(folder + file));
+					new FunkinLua(folder + file);
 				if(file.toLowerCase().endsWith('.hx'))
 					initHScript(folder + file);
 			}
@@ -993,7 +993,7 @@ class PlayState extends MusicBeatState
 		if(doPush)
 		{
 			for (script in luaArray) if(script.scriptName == luaFile) return;
-			luaArray.push(new FunkinLua(luaFile));
+			new FunkinLua(luaFile);
 		}
 		#end
 		
@@ -3660,7 +3660,7 @@ class PlayState extends MusicBeatState
 		if(OpenFlAssets.exists(luaToLoad))
 		#end
 		{
-			luaArray.push(new FunkinLua(luaToLoad));
+			new FunkinLua(luaToLoad);
 			return true;
 		}
 		return false;
@@ -3733,16 +3733,17 @@ class PlayState extends MusicBeatState
 		if(args == null) args = [];
 		if(exclusions == null) exclusions = [];
 		if(excludeValues == null) excludeValues = [];
+		excludeValues.push(FunkinLua.Function_Continue);
 
 		for (script in luaArray) {
 			if(exclusions.contains(script.scriptName))
 				continue;
 
-			var myValue = script.call(funcToCall, args);
+			var myValue:Dynamic = script.call(funcToCall, args);
 			if(myValue == FunkinLua.Function_StopLua && !ignoreStops)
 				break;
 			
-			if(myValue != null && myValue != FunkinLua.Function_Continue)
+			if(myValue != null && !excludeValues.contains(myValue))
 				returnVal = myValue;
 		}
 		#end
